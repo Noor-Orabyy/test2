@@ -3,14 +3,13 @@ import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
-# load dataset
+# LOAD DATASET
 df = pd.read_csv("phishing_site_urls.csv")
 
-# IMPORTANT: adjust if your dataset columns differ
-X = df["URL"]
+X_raw = df["URL"]
 y = df["Label"]
 
-# simple feature engineering (basic version)
+# FEATURES
 def extract_features(url):
     return [
         len(url),
@@ -20,9 +19,10 @@ def extract_features(url):
         int("https" in url)
     ]
 
-X = X.apply(extract_features)
+X = X_raw.apply(extract_features)
 X = list(X)
 
+# TRAIN
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 model = RandomForestClassifier()
@@ -30,4 +30,4 @@ model.fit(X_train, y_train)
 
 joblib.dump(model, "phishing_model.pkl")
 
-print("URL model saved")
+print("URL MODEL SAVED ✔")
