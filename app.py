@@ -1,46 +1,94 @@
 import streamlit as st
-import joblib
-import os
 
-# LOAD MODELS SAFELY
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# -----------------------------
+# SOCIAL ENGINEERING TACTICS
+# -----------------------------
+TACTICS = {
+    "1": "Urgency - Creates pressure to act quickly",
+    "2": "Private Info Request - Asks for sensitive data",
+    "3": "Phishing - Fake trusted brand messages",
+    "4": "Pretexting - Fake identity/scenario",
+    "5": "Baiting - Offers something tempting",
+    "6": "Scareware - Fake warning threats",
+    "7": "Honey Trap - Emotional manipulation",
+    "8": "Quid Pro Quo - Exchange of service for info"
+}
 
-url_model = joblib.load(os.path.join(BASE_DIR, "phishing_model.pkl"))
-text_model = joblib.load(os.path.join(BASE_DIR, "text_model.pkl"))
-vectorizer = joblib.load(os.path.join(BASE_DIR, "vectorizer.pkl"))
+# -----------------------------
+# URL CHECK (simple heuristic)
+# -----------------------------
+def url_check(url):
+    if not url:
+        return "SAFE"
 
-# FEATURE FUNCTION
-def url_features(url):
-    return [[
-        len(url),
-        url.count("."),
-        url.count("-"),
-        int("@" in url),
-        int("https" in url)
-    ]]
+    score = 0
 
-# UI
-st.title("Phishing + Social Engineering Detector")
+    if len(url) > 75:
+        score += 1
+    if "@" in url:
+        score += 1
+    if url.count("-") > 3:
+        score += 1
+    if url.count(".") > 4:
+        score += 1
+    if "https" not in url:
+        score += 1
 
-url = st.text_input("Enter URL")
-msg = st.text_area("Enter message (optional)")
+    return "PHISHING" if score >= 2 else "SAFE"
 
+
+# -----------------------------
+# MESSAGE CHECK (tactic-based)
+# -----------------------------
+def message_check(choices):
+    score = 0
+
+    selected = choices.split(",")
+
+    for c in selected:
+        c = c.strip()
+        if c in TACTICS:
+            score += 1
+
+    if score >= 5:
+        return "HIGH RISK"
+    elif score >= 3:
+        return "MEDIUM RISK"
+    else:
+        return "LOW RISK"
+
+
+# -----------------------------
+# STREAMLIT UI
+# -----------------------------
+st.title("Phishing & Social Engineering Detector")
+
+st.subheader("Enter URL")
+url = st.text_input("URL")
+
+st.subheader("Select Social Engineering Tactics")
+
+for k, v in TACTICS.items():
+    st.write(f"{k}. {v}")
+
+choices = st.text_input("Enter numbers (comma separated like 1,3,5)")
+
+# -----------------------------
+# RUN DETECTION
+# -----------------------------
 if st.button("Check"):
 
-    result = "SAFE"
+    url_result = url_check(url)
+    msg_result = message_check(choices)
 
-    # URL CHECK
-    if url:
-        pred = url_model.predict(url_features(url))[0]
-        if pred == 1:
-            result = "PHISHING"
+    # FINAL DECISION LOGIC
+    if url_result == "PHISHING" or msg_result in ["HIGH RISK", "MEDIUM RISK"]:
+        final = "🚨 RISK DETECTED"
+    else:
+        final = "✅ SAFE"
 
-    # TEXT CHECK
-    if msg:
-        x = vectorizer.transform([msg])
-        pred2 = text_model.predict(x)[0]
-        if pred2 == 1:
-            result = "PHISHING"
+    st.subheader("RESULT")
+    st.write(final)
 
-    st.subheader("Result:")
-    st.write(result)
+    st.write("URL Status:", url_result)
+    st.write("Message Risk:", msg_result)
