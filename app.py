@@ -3,8 +3,8 @@ import streamlit as st
 st.markdown("""
 <style>
 .stApp {
-    background-color: #0e1117;
-    color: white;
+    background-color: #e8f6ff;
+    color: #1e3a5f;
 }
 </style>
 """, unsafe_allow_html=True)
