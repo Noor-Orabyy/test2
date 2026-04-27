@@ -1,94 +1,98 @@
 import streamlit as st
 
 # -----------------------------
-# SOCIAL ENGINEERING TACTICS
+# BACKGROUND COLOR (CSS)
 # -----------------------------
-TACTICS = {
-    "1": "Urgency - Creates pressure to act quickly",
-    "2": "Private Info Request - Asks for sensitive data",
-    "3": "Phishing - Fake trusted brand messages",
-    "4": "Pretexting - Fake identity/scenario",
-    "5": "Baiting - Offers something tempting",
-    "6": "Scareware - Fake warning threats",
-    "7": "Honey Trap - Emotional manipulation",
-    "8": "Quid Pro Quo - Exchange of service for info"
+st.markdown("""
+<style>
+.stApp {
+    background-color: #0e1117;
+    color: white;
 }
-
-# -----------------------------
-# URL CHECK (simple heuristic)
-# -----------------------------
-def url_check(url):
-    if not url:
-        return "SAFE"
-
-    score = 0
-
-    if len(url) > 75:
-        score += 1
-    if "@" in url:
-        score += 1
-    if url.count("-") > 3:
-        score += 1
-    if url.count(".") > 4:
-        score += 1
-    if "https" not in url:
-        score += 1
-
-    return "PHISHING" if score >= 2 else "SAFE"
+</style>
+""", unsafe_allow_html=True)
 
 
 # -----------------------------
-# MESSAGE CHECK (tactic-based)
+# FUNCTIONS
 # -----------------------------
-def message_check(choices):
-    score = 0
+def url_page():
+    st.title("🔗 Check Link")
 
-    selected = choices.split(",")
+    url = st.text_input("Enter URL")
 
-    for c in selected:
-        c = c.strip()
-        if c in TACTICS:
-            score += 1
+    if st.button("Analyze Link"):
+        score = 0
 
-    if score >= 5:
-        return "HIGH RISK"
-    elif score >= 3:
-        return "MEDIUM RISK"
-    else:
-        return "LOW RISK"
+        if url:
+            if len(url) > 75:
+                score += 1
+            if "@" in url:
+                score += 1
+            if url.count("-") > 3:
+                score += 1
+            if url.count(".") > 4:
+                score += 1
+            if "https" not in url:
+                score += 1
+
+        if score >= 2:
+            st.error("🚨 PHISHING LINK")
+        else:
+            st.success("✅ SAFE LINK")
+
+
+def message_page():
+    st.title("💬 Check Message")
+
+    st.write("Select suspicious indicators:")
+
+    choices = st.text_input("Enter numbers (e.g. 1,3,5)")
+
+    if st.button("Analyze Message"):
+        score = 0
+
+        if choices:
+            selected = choices.split(",")
+            score = len(selected)
+
+        if score >= 5:
+            st.error("🚨 HIGH RISK")
+        elif score >= 3:
+            st.warning("⚠️ MEDIUM RISK")
+        else:
+            st.success("✅ LOW RISK")
 
 
 # -----------------------------
-# STREAMLIT UI
+# HOME PAGE
 # -----------------------------
-st.title("Phishing & Social Engineering Detector")
+st.title("🛡️ Security Detector System")
 
-st.subheader("Enter URL")
-url = st.text_input("URL")
+st.write("Choose an option:")
 
-st.subheader("Select Social Engineering Tactics")
+col1, col2 = st.columns(2)
 
-for k, v in TACTICS.items():
-    st.write(f"{k}. {v}")
+with col1:
+    if st.button("🔗 Check Link"):
+        st.session_state.page = "url"
 
-choices = st.text_input("Enter numbers (comma separated like 1,3,5)")
+with col2:
+    if st.button("💬 Check Message"):
+        st.session_state.page = "msg"
+
 
 # -----------------------------
-# RUN DETECTION
+# PAGE ROUTING
 # -----------------------------
-if st.button("Check"):
+if "page" not in st.session_state:
+    st.session_state.page = "home"
 
-    url_result = url_check(url)
-    msg_result = message_check(choices)
+if st.session_state.page == "url":
+    url_page()
 
-    # FINAL DECISION LOGIC
-    if url_result == "PHISHING" or msg_result in ["HIGH RISK", "MEDIUM RISK"]:
-        final = "🚨 RISK DETECTED"
-    else:
-        final = "✅ SAFE"
+elif st.session_state.page == "msg":
+    message_page()
 
-    st.subheader("RESULT")
-    st.write(final)
-
-    st.write("URL Status:", url_result)
-    st.write("Message Risk:", msg_result)
+else:
+    st.write("Welcome 👋 Select a feature above")
