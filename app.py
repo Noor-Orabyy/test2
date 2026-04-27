@@ -1,98 +1,142 @@
 import streamlit as st
 
-# -----------------------------
-# BACKGROUND COLOR (CSS)
-# -----------------------------
 st.markdown("""
 <style>
 .stApp {
-    background-color: #e8f6ff;
-    color: #1e3a5f;
+    background-color: #0e1117;
+    color: white;
 }
 </style>
 """, unsafe_allow_html=True)
 
 
-# -----------------------------
-# FUNCTIONS
-# -----------------------------
-def url_page():
-    st.title("Check Link")
+def analyze_url(url):
+    score = 0
+    reasons = []
 
-    url = st.text_input("Enter URL")
+    if not url:
+        return 0, ["No URL provided"]
 
-    if st.button("Analyze Link"):
-        score = 0
+    if len(url) > 75:
+        score += 1
+        reasons.append("URL is unusually long")
 
-        if url:
-            if len(url) > 75:
-                score += 1
-            if "@" in url:
-                score += 1
-            if url.count("-") > 3:
-                score += 1
-            if url.count(".") > 4:
-                score += 1
-            if "https" not in url:
-                score += 1
+    if "@" in url:
+        score += 1
+        reasons.append("Contains '@' symbol")
 
-        if score >= 2:
-            st.error("PHISHING LINK")
-        else:
-            st.success("SAFE LINK")
+    if url.count("-") > 3:
+        score += 1
+        reasons.append("Excessive hyphens")
 
+    if url.count(".") > 4:
+        score += 1
+        reasons.append("Multiple subdomains")
 
-def message_page():
-    st.title("Check Message")
+    if "https" not in url:
+        score += 1
+        reasons.append("Not using HTTPS")
 
-    st.write("Select suspicious indicators:")
-
-    choices = st.text_input("Enter numbers (e.g. 1,3,5)")
-
-    if st.button("Analyze Message"):
-        score = 0
-
-        if choices:
-            selected = choices.split(",")
-            score = len(selected)
-
-        if score >= 5:
-            st.error("HIGH RISK")
-        elif score >= 3:
-            st.warning("MEDIUM RISK")
-        else:
-            st.success("LOW RISK")
+    return score, reasons
 
 
-# -----------------------------
-# HOME PAGE
-# -----------------------------
-st.title("Security Detector System")
+def risk_level(score):
+    if score >= 4:
+        return "HIGH RISK"
+    elif score >= 2:
+        return "MEDIUM RISK"
+    else:
+        return "LOW RISK"
 
-st.write("Choose an option:")
 
-col1, col2 = st.columns(2)
+def home_page():
+    st.title("Security Detector System")
 
-with col1:
-    if st.button("Check Link"):
+    st.subheader("Guidelines for Online Safety Awareness")
+
+    st.write("""
+This is not an official method for identifying attacks, so always exercise caution.
+
+Never click on a link without verifying it first. You can hover your cursor over it to see the actual destination.
+
+Report any social engineering attacks to your local authorities.
+
+Regularly educate users about online safety, emphasizing the importance of avoiding suspicious links and not sharing personal information.
+
+Stay informed and help educate those around you about the dangers of social engineering.
+""")
+
+    col1, col2 = st.columns(2)
+
+    if col1.button("Check Link"):
         st.session_state.page = "url"
 
-with col2:
-    if st.button("Check Message"):
+    if col2.button("Check Message"):
         st.session_state.page = "msg"
 
 
-# -----------------------------
-# PAGE ROUTING
-# -----------------------------
+def url_page():
+    st.title("Link Analysis")
+
+    url = st.text_input("Enter URL")
+
+    if st.button("Analyze"):
+        score, reasons = analyze_url(url)
+        level = risk_level(score)
+
+        st.subheader("Risk Level")
+        st.write(level)
+
+        st.subheader("Risk Score (0-5)")
+        st.write(score)
+
+        st.subheader("Reasons")
+        for r in reasons:
+            st.write(r)
+
+
+def message_page():
+    st.title("Message Analysis")
+
+    text = st.text_area("Enter message")
+
+    if st.button("Analyze"):
+        score = 0
+        reasons = []
+
+        keywords = {
+            "password": "Requests credentials",
+            "urgent": "Creates urgency",
+            "bank": "Financial impersonation",
+            "click": "Suspicious link encouragement",
+            "verify": "Identity verification scam"
+        }
+
+        if text:
+            for k, v in keywords.items():
+                if k in text.lower():
+                    score += 1
+                    reasons.append(v)
+
+        level = risk_level(score)
+
+        st.subheader("Risk Level")
+        st.write(level)
+
+        st.subheader("Risk Score (0-5)")
+        st.write(score)
+
+        st.subheader("Reasons")
+        for r in reasons:
+            st.write(r)
+
+
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
-if st.session_state.page == "url":
+if st.session_state.page == "home":
+    home_page()
+elif st.session_state.page == "url":
     url_page()
-
 elif st.session_state.page == "msg":
     message_page()
-
-else:
-    st.write("Please Select a feature to use")
