@@ -17,7 +17,7 @@ st.markdown("""
 # FUNCTIONS
 # -----------------------------
 def url_page():
-    st.title("🔗 Check Link")
+    st.title("Check Link")
 
     url = st.text_input("Enter URL")
 
@@ -37,13 +37,13 @@ def url_page():
                 score += 1
 
         if score >= 2:
-            st.error("🚨 PHISHING LINK")
+            st.error("PHISHING LINK")
         else:
-            st.success("✅ SAFE LINK")
+            st.success("SAFE LINK")
 
 
 def message_page():
-    st.title("💬 Check Message")
+    st.title("Check Message")
 
     st.write("Select suspicious indicators:")
 
@@ -57,28 +57,28 @@ def message_page():
             score = len(selected)
 
         if score >= 5:
-            st.error("🚨 HIGH RISK")
+            st.error("HIGH RISK")
         elif score >= 3:
-            st.warning("⚠️ MEDIUM RISK")
+            st.warning("MEDIUM RISK")
         else:
-            st.success("✅ LOW RISK")
+            st.success("LOW RISK")
 
 
 # -----------------------------
 # HOME PAGE
 # -----------------------------
-st.title("🛡️ Security Detector System")
+st.title("Security Detector System")
 
 st.write("Choose an option:")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("🔗 Check Link"):
+    if st.button("Check Link"):
         st.session_state.page = "url"
 
 with col2:
-    if st.button("💬 Check Message"):
+    if st.button("Check Message"):
         st.session_state.page = "msg"
 
 
@@ -95,4 +95,4 @@ elif st.session_state.page == "msg":
     message_page()
 
 else:
-    st.write("Welcome 👋 Select a feature above")
+    st.write("Please Select a feature to use")
