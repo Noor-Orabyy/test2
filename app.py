@@ -1,12 +1,15 @@
 import streamlit as st
 import joblib
+import os
 
-# load models
-url_model = joblib.load("phishing_model.pkl")
-text_model = joblib.load("text_model.pkl")
-vectorizer = joblib.load("vectorizer.pkl")
+# LOAD MODELS SAFELY
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+url_model = joblib.load(os.path.join(BASE_DIR, "phishing_model.pkl"))
+text_model = joblib.load(os.path.join(BASE_DIR, "text_model.pkl"))
+vectorizer = joblib.load(os.path.join(BASE_DIR, "vectorizer.pkl"))
 
+# FEATURE FUNCTION
 def url_features(url):
     return [[
         len(url),
@@ -16,25 +19,23 @@ def url_features(url):
         int("https" in url)
     ]]
 
+# UI
+st.title("Phishing + Social Engineering Detector")
 
-st.title("Phishing & Social Engineering Detector")
-
-# INPUT
 url = st.text_input("Enter URL")
 msg = st.text_area("Enter message (optional)")
 
-# PREDICT
 if st.button("Check"):
 
     result = "SAFE"
 
-    # URL prediction
+    # URL CHECK
     if url:
         pred = url_model.predict(url_features(url))[0]
         if pred == 1:
             result = "PHISHING"
 
-    # text prediction
+    # TEXT CHECK
     if msg:
         x = vectorizer.transform([msg])
         pred2 = text_model.predict(x)[0]
