@@ -10,12 +10,23 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-def analyze_url(url):
+def load_malicious_db():
+    try:
+        with open("malicious_urls.txt", "r") as f:
+            return [line.strip() for line in f.readlines()]
+    except:
+        return []
+
+
+def analyze_url(url, db):
     score = 0
     reasons = []
 
     if not url:
-        return 0, ["No URL provided"]
+        return 0, ["No URL provided"], False
+
+    if any(malicious in url for malicious in db):
+        return 5, ["Matched malicious database entry"], True
 
     if len(url) > 75:
         score += 1
@@ -37,7 +48,7 @@ def analyze_url(url):
         score += 1
         reasons.append("Not using HTTPS")
 
-    return score, reasons
+    return score, reasons, False
 
 
 def risk_level_url(score):
@@ -109,12 +120,18 @@ def message_page():
 def url_page():
     st.title("Link Analysis")
 
+    db = load_malicious_db()
+
     url = st.text_input("Enter URL")
 
     if st.button("Analyze Link"):
 
-        score, reasons = analyze_url(url)
-        level = risk_level_url(score)
+        score, reasons, matched = analyze_url(url, db)
+
+        if matched:
+            level = "HIGH RISK (DATABASE MATCH)"
+        else:
+            level = risk_level_url(score)
 
         st.subheader("Risk Level")
         st.write(level)
