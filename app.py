@@ -40,13 +40,85 @@ def analyze_url(url):
     return score, reasons
 
 
-def risk_level(score):
+def risk_level_url(score):
     if score >= 4:
         return "HIGH RISK"
     elif score >= 2:
         return "MEDIUM RISK"
     else:
         return "LOW RISK"
+
+
+def message_page():
+    st.title("Message Analysis")
+
+    st.subheader("Answer the following questions")
+
+    q1 = st.checkbox("1. The message creates urgency (Act now, immediately)")
+    q2 = st.checkbox("2. It asks for private information (password, credit card)")
+    q3 = st.checkbox("3. It pretends to be a trusted company or person")
+    q4 = st.checkbox("4. It asks you to click a link or login")
+    q5 = st.checkbox("5. It offers something attractive (free, prize)")
+    q6 = st.checkbox("6. It uses fear (virus detected, account blocked)")
+    q7 = st.checkbox("7. It feels suspicious or unusual")
+    q8 = st.checkbox("8. It pressures you not to think or verify")
+
+    if st.button("Analyze Message"):
+
+        score = 0
+        reasons = []
+
+        checks = [
+            (q1, "Urgency detected"),
+            (q2, "Requests private information"),
+            (q3, "Impersonates trusted entity"),
+            (q4, "Requests login or link click"),
+            (q5, "Bait / reward offer"),
+            (q6, "Fear-based manipulation"),
+            (q7, "Suspicious behavior"),
+            (q8, "Pressure without verification")
+        ]
+
+        for checked, reason in checks:
+            if checked:
+                score += 1
+                reasons.append(reason)
+
+        if score >= 6:
+            level = "HIGH RISK"
+        elif score >= 3:
+            level = "MEDIUM RISK"
+        else:
+            level = "LOW RISK"
+
+        st.subheader("Risk Level")
+        st.write(level)
+
+        st.write("Risk score (0-8) = " + str(score))
+
+        st.subheader("Reasons")
+        for r in reasons:
+            st.write(r)
+
+
+def url_page():
+    st.title("Link Analysis")
+
+    url = st.text_input("Enter URL")
+
+    if st.button("Analyze Link"):
+
+        score, reasons = analyze_url(url)
+        level = risk_level_url(score)
+
+        st.subheader("Risk Level")
+        st.write(level)
+
+        st.write("Risk score (0-5) = " + str(score))
+
+        st.subheader("Reasons")
+        for r in reasons:
+            st.write(r)
 
 
 def home_page():
@@ -73,60 +145,6 @@ Stay informed and help educate those around you about the dangers of social engi
 
     if col2.button("Check Message"):
         st.session_state.page = "msg"
-
-
-def url_page():
-    st.title("Link Analysis")
-
-    url = st.text_input("Enter URL")
-
-    if st.button("Analyze"):
-        score, reasons = analyze_url(url)
-        level = risk_level(score)
-
-        st.subheader("Risk Level")
-        st.write(level)
-
-        st.write("Risk score (0-5) = " + str(score))
-
-        st.subheader("Reasons")
-        for r in reasons:
-            st.write(r)
-
-
-def message_page():
-    st.title("Message Analysis")
-
-    text = st.text_area("Enter message")
-
-    if st.button("Analyze"):
-        score = 0
-        reasons = []
-
-        keywords = {
-            "password": "Requests credentials",
-            "urgent": "Creates urgency",
-            "bank": "Financial impersonation",
-            "click": "Suspicious link encouragement",
-            "verify": "Identity verification scam"
-        }
-
-        if text:
-            for k, v in keywords.items():
-                if k in text.lower():
-                    score += 1
-                    reasons.append(v)
-
-        level = risk_level(score)
-
-        st.subheader("Risk Level")
-        st.write(level)
-
-        st.write("Risk score (0-5) = " + str(score))
-
-        st.subheader("Reasons")
-        for r in reasons:
-            st.write(r)
 
 
 if "page" not in st.session_state:
