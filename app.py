@@ -49,10 +49,13 @@ def risk_level_url(score):
         return "LOW RISK"
 
 
+def back_button():
+    if st.button("Back to Home"):
+        st.session_state.page = "home"
+
+
 def message_page():
     st.title("Message Analysis")
-
-    st.subheader("Answer the following questions")
 
     q1 = st.checkbox("1. The message creates urgency (Act now, immediately)")
     q2 = st.checkbox("2. It asks for private information (password, credit card)")
@@ -100,6 +103,8 @@ def message_page():
         for r in reasons:
             st.write(r)
 
+    back_button()
+
 
 def url_page():
     st.title("Link Analysis")
@@ -119,6 +124,8 @@ def url_page():
         st.subheader("Reasons")
         for r in reasons:
             st.write(r)
+
+    back_button()
 
 
 def home_page():
