@@ -85,13 +85,13 @@ def url_page():
         level = risk_level(score)
 
       st.subheader("Risk Level")
-st.write(level)
+      st.write(level)
 
-st.write("Risk score (0-5) = " + str(score))
+      st.write("Risk score (0-5) = " + str(score))
 
-st.subheader("Reasons")
-for r in reasons:
-    st.write(r)
+      st.subheader("Reasons")
+      for r in reasons:
+      st.write(r)
 
 
 def message_page():
@@ -118,14 +118,14 @@ def message_page():
                     reasons.append(v)
 
    
-st.subheader("Risk Level")
-st.write(level)
+           st.subheader("Risk Level")
+    st.write(level)
 
-st.write("Risk score (0-5) = " + str(score))
+    st.write("Risk score (0-5) = " + str(score))
 
-st.subheader("Reasons")
-for r in reasons:
-    st.write(r)
+    st.subheader("Reasons")
+    for r in reasons:
+        st.write(r)
 
 if "page" not in st.session_state:
     st.session_state.page = "home"
